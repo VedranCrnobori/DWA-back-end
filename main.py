@@ -2,29 +2,16 @@ from flask import Flask, Response, jsonify, request
 import datetime as dt
 import domain as db
 import simplejson as json
-from flask_cors import CORS          #Cross Origin Resource Sharing - komunikacija s frontendom
+from flask_cors import CORS
 
 app = Flask(__name__)
-# Dodajemo app u CORS kako bi bili u mogucnosti komunicirati s frontendom
 CORS(app)
 
 # Error funkcija
 def error(status=500, text='Doslo je do greške'):
     return jsonify({"error": text}), status
 
-# Ovo je kao home page za backend. Samo prikazuje status da je uspjesno pokrenut
-# AKo hoces pogledati mozes na : http://127.0.0.1:5000/
-@app.route('/')
-def hello():
-    return jsonify({
-        'status' : 'uspješno'
-    })
 
-
-
-########### Za klasu Korisnik ############
-
-#   Dodavanje novog korisnika  #
 @app.route('/korisnik/registracija', methods=['GET', 'POST', 'PUT'])
 def handle_korisnik_get_post():
     if request.method == 'POST':
@@ -38,7 +25,6 @@ def handle_korisnik_get_post():
         smjer = data.get('smjer')
         id_ = db.novi_korisnik(ime, prezime, email, lozinka, grad_studiranja, sveuciliste, smjer)
         if id_ == None:
-            #Pozivamo error funkciju
             return error()
         else:
             return jsonify({
@@ -57,7 +43,6 @@ def handle_korisnik_get_post():
         smjer = data.get('smjer')
         odg = db.uredi_korisnika(id, ime, prezime, email, lozinka, grad_studiranja, sveuciliste, smjer)
         if odg == False:
-            #Pozivamo error funkciju
             return error()
         else:
             return jsonify({
@@ -65,21 +50,17 @@ def handle_korisnik_get_post():
                 'data' : odg
             })
 
-#   Prijava postojeceg korisnika  #
 @app.route('/korisnik/prijava', methods=['POST'])
 def prijava_korisnika():
     data = request.get_json()
-    # U frontendu se mora navesti 'email' i 'password' u poketu koji saljes za backend kako bi ga mogao iscitati ovdje
     email = data.get('email')
     lozinka = data.get('lozinka')
-    # Pozivamo klasu Korisnik s funkcijom prijava i saljemo parametre. Vracene podatke spremamo u objekt 'korisnik'
     korisnik = db.prijava(email, lozinka)
     if korisnik == None:
         return error()
     else:
         return jsonify({
             'status' : 'success',
-            # vraca sve korisnikove podatke
             'korisnik' : korisnik
         })
 
@@ -89,21 +70,14 @@ def prijava_admina():
     ime = data.get('email')
     lozinka = data.get('lozinka')
     admin = db.prijava_admin(ime, lozinka)
-    # ako varijabla admin je prazna, odnosno ga nema u bazi ulazi u if i poziva error
     if admin == None:
         return error()
-    else:                   # ako ima u bazi admina onda ga salje preko jsonify-ja
+    else:
         return jsonify({
             'status' : 'success',
-            # vraca admina
             'admin' : admin
         })
 
-##################################################
-
-########### Za klasu Skripte ############
-
-#   Dodavanje nove skripte   #
 @app.route('/skripte', methods=['GET', 'POST', 'PUT'])
 def handle_skripte():
     if request.method == 'GET':
@@ -146,10 +120,6 @@ def handle_skripte_brisanje():
         'status' : 'success',
         'skripte' : skripte
     })
-
-##################################################
-
-########### Za klasu Obavijesti ############
 
 @app.route('/obavijesti', methods=['GET', 'POST', 'PUT'])
 def handle_obavijesti():
