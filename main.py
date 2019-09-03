@@ -12,6 +12,8 @@ CORS(app)
 def error(status=500, text='Doslo je do greške'):
     return jsonify({"error": text}), status
 
+# Ovo je kao home page za backend. Samo prikazuje status da je uspjesno pokrenut
+# AKo hoces pogledati mozes na : http://127.0.0.1:5000/
 @app.route('/')
 def hello():
     return jsonify({
@@ -50,7 +52,7 @@ def handle_korisnik_get_post():
         prezime = data.get('prezime')
         email = data.get('email')
         lozinka = data.get('lozinka')
-        grad_studiranja = data.get('gradStudiranja')
+        grad_studiranja = data.get('grad')
         sveuciliste = data.get('sveuciliste')
         smjer = data.get('smjer')
         odg = db.uredi_korisnika(id, ime, prezime, email, lozinka, grad_studiranja, sveuciliste, smjer)
@@ -87,12 +89,13 @@ def prijava_admina():
     ime = data.get('email')
     lozinka = data.get('lozinka')
     admin = db.prijava_admin(ime, lozinka)
+    # ako varijabla admin je prazna, odnosno ga nema u bazi ulazi u if i poziva error
     if admin == None:
         return error()
-    else:
+    else:                   # ako ima u bazi admina onda ga salje preko jsonify-ja
         return jsonify({
             'status' : 'success',
-            # vraca sve korisnikove podatke
+            # vraca admina
             'admin' : admin
         })
 
